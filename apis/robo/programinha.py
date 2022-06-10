@@ -1,15 +1,7 @@
-from distutils.command.upload import upload
-import string
-from tkinter import filedialog
-import pandas as pd
-import numpy as np
 from tkinter import *
 from tkinter import ttk
-from tkcalendar import Calendar, DateEntry
-import tratamento_banqi
-import tratamento_privalia
-import tratadados
-
+from tkinter import filedialog
+import pandas as pd
 
 janela = Tk()
 janela.title("Tratamento dos dados de ASO")
@@ -25,6 +17,8 @@ cb_clientes = ttk.Combobox(janela, values=listaClientes)
 cb_clientes.set("BanQi")
 cb_clientes.pack()
 
+banqi = cb_clientes.set("BanQi")
+privalia = cb_clientes.set("Privalia")
 
 
 lb_periodo = Label(janela, text="Selecione o período dos dados:")
@@ -44,23 +38,14 @@ lb_final.pack()
 dataFinal = Entry(janela, width=10)
 dataFinal.pack()
 
-
-def trataDados():
-    if listaClientes[0]:
-        tratar_banqi()
-    elif listaClientes[1]:
-        tratar_privalia()
-def lerArquivo():
-    arquivo = filedialog.askopenfile(mode="r", initialdir="/Desktop", title="Selecione um arquivo", filetypes=(("Arquivos CSV", "*.csv")))
-    conteudo = arquivo.read()
-
-df = pd.read_csv(lerArquivo(), encoding = "UTF-8", sep = ",")
-
+      #  "2022-06-07":"2022-05-08"
+    
 def tratar_banqi():
-    df
-    datas = df.T[string(dataInicial):string(dataFinal)]
-    termos = df["Term"]
-    posicoes = df.T[string(dataInicial):string(dataFinal)]
+    arquivoPasta = filedialog.askopenfile()
+    arquivo = pd.read_csv(arquivoPasta, encoding = "UTF-8", sep = ",")
+    datas = arquivo.T[str(dataFinal.get()):str(dataInicial.get())]
+    termos = arquivo["Term"]
+    posicoes = arquivo.T[str(dataFinal.get()):str(dataInicial.get())]
     x = posicoes.to_numpy()
 
     #seleção dos dados de datas
@@ -90,13 +75,15 @@ def tratar_banqi():
         
 
     base = pd.DataFrame(dados, columns = ["datas", "termos", "posição"])
-    base.to_csv("nova_base.csv")
+    base.to_csv("C:/Users/User/Documents/git-e-github/Meus arquivos/apis/robo/nova_base.csv", encoding="UTF-8")
+
 def tratar_privalia():
-    df
-    datas = df.T[string(dataInicial):string(dataFinal)]
-    termos = df["Term"]
-    appId = df["App ID"].values
-    posicoes = df.T[string(dataInicial):string(dataFinal)]
+    arquivoPasta = filedialog.askopenfile()
+    arquivo = pd.read_csv(arquivoPasta, encoding = "UTF-8", sep = ",")
+    datas = arquivo.T[str(dataFinal.get()):str(dataInicial.get())]
+    termos = arquivo["Term"]
+    appId = arquivo["App ID"].values
+    posicoes = arquivo.T[str(dataFinal.get()):str(dataInicial.get())]
     x = posicoes.to_numpy()
 
     #seleção dos dados de datas
@@ -130,12 +117,17 @@ def tratar_privalia():
 
 
     base = pd.DataFrame(dados, columns = ["datas", "termos", "id", "posição"])
-    base.to_csv("nova_base.csv")
+    base.to_csv("C:/Users/User/Documents/git-e-github/Meus arquivos/apis/robo/nova_base.csv")
+
+def tratar_dados():
+    cliente = cb_clientes.get()
+    if cliente == "BanQi":
+        tratar_banqi()
+    elif cliente == "Privalia":
+        tratar_privalia()
 
 
-up_arquivo = Button(janela, text="Selecione o arquivo", width=5, height=1, background="lightgreen", command=(lerArquivo))
-
-botao = Button(janela, text="Go!", width=5, height=1, background="lightblue", command=trataDados())
+botao = Button(janela, text="Go!", width=5, height=1, background="lightblue", command=tratar_dados)
 botao.pack()
 
 
